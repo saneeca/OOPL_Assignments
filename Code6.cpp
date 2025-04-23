@@ -1,98 +1,96 @@
 #include <iostream>
 using namespace std;
 
-class DB;  // Forward declaration for the friend function
+class DB; // Forward declaration
 
 class DM 
 {
-private:
     int meters;
     int centimeters;
 
 public:
-    // Constructor to initialize DM object
-    DM(int m = 0, int cm = 0) : meters(m), centimeters(cm) {}
+    DM(int m = 0, int cm = 0) 
+{
+        meters = m;
+        centimeters = cm;
+    }
 
-    // Friend function to add DM and DB objects
-    friend DM addDistance(const DM& dm, const DB& db);
+    void getdata() 
+{
+        cout << "Enter distance in meters and centimeters:\n";
+        cout << "Meters: ";
+        cin >> meters;
+        cout << "Centimeters: ";
+        cin >> centimeters;
+    }
 
-    // Function to display DM object in meters and centimeters
     void display() 
 {
-        cout << meters << " meters " << centimeters << " centimeters" << endl;
+        cout << "Distance: " << meters << " meters, " << centimeters << " centimeters\n";
     }
+
+    friend DM add(DM d1, DB d2); // Friend function
 };
 
 class DB 
 {
-private:
     int feet;
     int inches;
 
 public:
-    // Constructor to initialize DB object
-    DB(int ft = 0, int in = 0) : feet(ft), inches(in) {}
+    DB(int f = 0, int in = 0) 
+{
+        feet = f;
+        inches = in;
+    }
 
-    // Friend function to add DM and DB objects
-    friend DM addDistance(const DM& dm, const DB& db);
+    void getdata() 
+{
+        cout << "Enter distance in feet and inches:\n";
+        cout << "Feet: ";
+        cin >> feet;
+        cout << "Inches: ";
+        cin >> inches;
+    }
 
-    // Function to display DB object in feet and inches
     void display() 
 {
-        cout << feet << " feet " << inches << " inches" << endl;
+        cout << "Distance: " << feet << " feet, " << inches << " inches\n";
     }
+
+    friend DM add(DM d1, DB d2); // Friend function
 };
 
-// Friend function to add DM and DB distances
-DM addDistance(const DM& dm, const DB& db) 
+// Friend function to add DM and DB, result in DM (meters & cm)
+DM add(DM d1, DB d2) 
 {
-    // Convert DB (feet and inches) to meters and centimeters
-    int totalInches = db.feet * 12 + db.inches;
-    int totalCentimeters = totalInches * 2.54;
+    // Convert DB (feet & inches) to centimeters
+    float total_cm_DB = (d2.feet * 30.48) + (d2.inches * 2.54);
 
-    // Add the distances in DM (meters and centimeters) and DB (converted to centimeters)
-    int totalCentimetersFinal = dm.meters * 100 + dm.centimeters + totalCentimeters;
-    
+    // Convert DM to centimeters
+    float total_cm_DM = (d1.meters * 100) + d1.centimeters;
+
+    // Total in cm
+    float sum_cm = total_cm_DM + total_cm_DB;
+
     // Convert back to meters and centimeters
-    int meters = totalCentimetersFinal / 100;
-    int centimeters = totalCentimetersFinal % 100;
+    int result_m = (int)(sum_cm / 100);
+    int result_cm = (int)(sum_cm) % 100;
 
-    // Create and return a new DM object with the result
-    return DM(meters, centimeters);
+    return DM(result_m, result_cm);
 }
+int main() 
+{
+    DM d1;
+    DB d2;
 
-int main() {
-    int meters, centimeters, feet, inches;
+    d1.getdata();
+    d2.getdata();
 
-    cout << "Enter distance in DM (meters and centimeters):" << endl;
-    cout << "Meters: ";
-    cin >> meters;
-    cout << "Centimeters: ";
-    cin >> centimeters;
-    DM dm(meters, centimeters);
+    DM result = add(d1, d2); // Result in meters & centimeters
 
-    cout << "Enter distance in DB (feet and inches):" << endl;
-    cout << "Feet: ";
-    cin >> feet;
-    cout << "Inches: ";
-    cin >> inches;
-    DB db(feet, inches);
-
-    // Adding DM and DB distances
-    DM result = addDistance(dm, db);
-
-    // Display the result in DM format (meters and centimeters)
-    cout << "Resulting distance in DM format (meters and centimeters): ";
+    cout << "\n--- Result in Meters & Centimeters ---\n";
     result.display();
-
-    // Display the result in DB format (feet and inches)
-    int totalCentimetersResult = result.meters * 100 + result.centimeters;
-    int totalInchesResult = totalCentimetersResult / 2.54;
-    int resultFeet = totalInchesResult / 12;
-    int resultInches = totalInchesResult % 12;
-
-    cout << "Resulting distance in DB format (feet and inches): ";
-    cout << resultFeet << " feet " << resultInches << " inches" << endl;
 
     return 0;
 }
