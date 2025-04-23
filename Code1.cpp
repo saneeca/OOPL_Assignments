@@ -1,90 +1,114 @@
 #include <iostream>
+#include <string>
 using namespace std;
 
-class Account {
+class Account 
+{
 protected:
-    string name;
-    int acc_no;
-    string acc_type;
-    float balance;
+    string customerName;
+    int accountNumber;
+    string accountType;
+    double balance;
 
 public:
-    void init(string n, int no, string type, float bal) {
-        name = n;
-        acc_no = no;
-        acc_type = type;
-        balance = bal;
+    void initialize(string name, int accNo, string type) 
+{
+        customerName = name;
+        accountNumber = accNo;
+        accountType = type;
+        balance = 0.0;
     }
 
-    void deposit(float amount) {
+    void deposit(double amount) 
+{
         balance += amount;
+        cout << "Amount deposited: " << amount << endl;
     }
 
-    void display_balance() {
-        cout << "Name: " << name << endl;
-        cout << "Account No: " << acc_no << endl;
-        cout << "Type: " << acc_type << endl;
-        cout << "Balance: " << balance << endl;
+    void displayBalance() const 
+{
+        cout << "Current balance: " << balance << endl;
     }
 
-    float get_balance() {
-        return balance;
+    virtual void withdraw(double amount) = 0; 
+};
+
+class sav_acc : public Account 
+{
+public:
+    void computeAndDepositInterest(double rate, int time) 
+{
+        double amount = balance;
+        for (int i = 0; i < time; ++i) 
+        {
+            amount += amount * (rate / 100);
+        }
+        double interest = amount - balance;
+        balance = amount;
+        cout << "Interest of " << interest << " added to account." << endl;
     }
 
-    void set_balance(float bal) {
-        balance = bal;
+    void withdraw(double amount) override 
+{
+        if (amount <= balance) 
+        {
+            balance -= amount;
+            cout << "Amount withdrawn: " << amount << endl;
+        } else {
+            cout << "Insufficient balance." << endl;
+        }
     }
 };
 
-class Sav_acct : public Account {
+class cur_acc : public Account 
+{
+    const double minBalance = 500.0;
+    const double serviceCharge = 50.0;
+
 public:
-    void compute_interest(float rate, int time) {
-        float interest = balance * rate * time / 100;
-        balance += interest;
+    void checkAndImposePenalty() 
+{
+        if (balance < minBalance) {
+            balance -= serviceCharge;
+            cout << "Balance below minimum. Service charge of " << serviceCharge << " imposed." << endl;
+        } else {
+            cout << "Balance is above minimum. No penalty imposed." << endl;
+        }
     }
 
-    void withdraw(float amount) {
+    void withdraw(double amount) override 
+{
         if (amount <= balance) {
             balance -= amount;
+            cout << "Amount withdrawn: " << amount << endl;
+            checkAndImposePenalty();
         } else {
-            cout << "Not enough balance." << endl;
+            cout << "Insufficient balance." << endl;
         }
     }
 };
 
-class Cur_acct : public Account {
-public:
-    void withdraw(float amount) {
-        if (amount <= balance) {
-            balance -= amount;
-            check_min_balance();
-        } else {
-            cout << "Not enough balance." << endl;
-        }
-    }
+int main() 
+{
+    sav_acc s;
+    cur_acc c;
 
-    void check_min_balance() {
-        if (balance < 500) {
-            cout << "Below minimum balance. Service charge applied." << endl;
-            balance -= 50;
-        }
-    }
-};
-int main() {
-    Sav_acct s;
-    Cur_acct c;
+    s.initialize("Alice", 101, "Savings");
+    c.initialize("Bob", 102, "Current");
 
-    s.init("Alice", 1001, "Savings", 1000);
-    c.init("Bob", 1002, "Current", 600);
-
-    s.deposit(200);
-    s.compute_interest(5, 2);  // 5% for 2 years
+    cout << "\n--- Savings Account ---" << endl;
+    s.deposit(1000);
+    s.displayBalance();
+    s.computeAndDepositInterest(5, 2); 
+    s.displayBalance();
     s.withdraw(300);
-    s.display_balance();
+    s.displayBalance();
 
-    c.deposit(100);
-    c.withdraw(300);
-    c.display_balance();
+    cout << "\n--- Current Account ---" << endl;
+    c.deposit(400); 
+    c.displayBalance();
+    c.withdraw(100);
+    c.displayBalance();
 
     return 0;
 }
